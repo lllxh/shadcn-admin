@@ -1,0 +1,228 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": ["**", "!src/routeTree.gen.ts", "!pnpm-lock.yaml"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "includes": [
+      "src/**",
+      "*.json",
+      "*.ts",
+      "*.yaml",
+      "index.html",
+      "README.md",
+      ".vscode/**",
+      ".github/workflows/**",
+      ".github/CONTRIBUTING.md"
+    ]
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "single",
+      "semicolons": "asNeeded",
+      "trailingCommas": "es5",
+      "arrowParentheses": "always"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    },
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "html": {
+    "formatter": {
+      "enabled": true
+    }
+  },
+  "tailwind": {
+    "stylesheet": "./src/styles/index.css",
+    "mergeFunctions": ["cn", "clsx"]
+  },
+  "assist": {
+    "enabled": true,
+    "includes": ["**/*.{ts,tsx,js,jsx}"],
+    "actions": {
+      "preset": "none",
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              "path",
+              "vite",
+              "@vitejs/**",
+              "react",
+              "react-dom/client",
+              "react/**",
+              "zod",
+              "axios",
+              "date-fns",
+              "react-hook-form",
+              "use-intl",
+              "@radix-ui/**",
+              "@hookform/resolvers/zod",
+              "@tanstack/react-query",
+              "@tanstack/react-router",
+              "@tanstack/react-table",
+              ":PACKAGE:",
+              "@/assets/**",
+              "@/api/**",
+              "@/stores/**",
+              "@/lib/**",
+              "@/utils/**",
+              "@/constants/**",
+              "@/context/**",
+              "@/hooks/**",
+              "@/components/layouts/**",
+              "@/components/ui/**",
+              "@/components/errors/**",
+              "@/components/**",
+              "@/features/**",
+              ":PATH:"
+            ],
+            "sortBareImports": false
+          }
+        }
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "includes": ["**/*.{ts,tsx}"],
+    "rules": {
+      "preset": "none",
+      "nursery": {
+        "useTailwindSortedClasses": {
+          "level": "error",
+          "fix": "safe"
+        }
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.{ts,tsx}", "!src/components/ui/**"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noAdjacentSpacesInRegex": "error",
+            "noArguments": "error",
+            "noBannedTypes": "error",
+            "noExtraBooleanCast": "error",
+            "noUselessCatch": "error",
+            "noUselessEscapeInRegex": "error",
+            "noUselessThisAlias": "error",
+            "noUselessTypeConstraint": "error"
+          },
+          "correctness": {
+            "noConstantCondition": "error",
+            "noEmptyCharacterClassInRegex": "error",
+            "noEmptyPattern": "error",
+            "noNonoctalDecimalEscape": "error",
+            "noPrecisionLoss": "error",
+            "noSelfAssign": "error",
+            "noSwitchDeclarations": "error",
+            "noUnsafeFinally": "error",
+            "noUnsafeOptionalChaining": "error",
+            "noUnusedFunctionParameters": {
+              "level": "error",
+              "options": {
+                "ignoreRestSiblings": true
+              }
+            },
+            "noUnusedImports": "error",
+            "noUnusedLabels": "error",
+            "noUnusedPrivateClassMembers": "error",
+            "noUnusedVariables": {
+              "level": "error",
+              "options": {
+                "ignoreRestSiblings": true,
+                "ignoreUsingDeclarations": false
+              }
+            },
+            "useExhaustiveDependencies": "warn",
+            "useHookAtTopLevel": "error",
+            "useIsNan": "error",
+            "useValidForDirection": "error",
+            "useValidTypeof": "error",
+            "useYield": "error"
+          },
+          "performance": {
+            "noDelete": "error"
+          },
+          "style": {
+            "noCommonJs": "error",
+            "noNamespace": "error",
+            "useArrayLiterals": "error",
+            "useAsConstAssertion": "error",
+            "useComponentExportOnlyModules": {
+              "level": "warn",
+              "options": {
+                "allowConstantExport": true
+              }
+            },
+            "useConst": "error",
+            "useErrorCause": "error",
+            "useImportType": {
+              "level": "error",
+              "options": {
+                "style": "inlineType"
+              }
+            },
+            "useSpreadOverApply": "error"
+          },
+          "suspicious": {
+            "noAssignInExpressions": "error",
+            "noAsyncPromiseExecutor": "error",
+            "noCatchAssign": "error",
+            "noCompareNegZero": "error",
+            "noConsole": "error",
+            "noConstantBinaryExpressions": "error",
+            "noControlCharactersInRegex": "error",
+            "noDebugger": "error",
+            "noDuplicateCase": "error",
+            "noDuplicateElseIf": "error",
+            "noDuplicateEnumValues": "error",
+            "noEmptyBlockStatements": "error",
+            "noExplicitAny": "error",
+            "noExtraNonNullAssertion": "error",
+            "noFallthroughSwitchClause": "error",
+            "noGlobalAssign": "error",
+            "noIrregularWhitespace": "error",
+            "noMisleadingCharacterClass": "error",
+            "noMisleadingInstantiator": "error",
+            "noNonNullAssertedOptionalChain": "error",
+            "noPrototypeBuiltins": "error",
+            "noShadowRestrictedNames": "error",
+            "noSparseArray": "error",
+            "noTsIgnore": "error",
+            "noUnassignedVariables": "error",
+            "noUnsafeDeclarationMerging": "error",
+            "noUselessRegexBackrefs": "error",
+            "noVar": "error",
+            "useNamespaceKeyword": "error"
+          }
+        }
+      }
+    }
+  ],
+  "yaml": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
+}

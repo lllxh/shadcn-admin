@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, type RenderResult } from 'vitest-browser-react'
-import { userEvent, type Locator } from 'vitest/browser'
+import { type Locator, userEvent } from 'vitest/browser'
+import { type RenderResult, render } from 'vitest-browser-react'
 import { ForgotPasswordForm } from './forgot-password-form'
 
 const navigateMock = vi.fn()

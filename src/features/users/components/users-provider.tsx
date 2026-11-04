@@ -24,7 +24,7 @@ export function UsersProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
+// biome-ignore lint/style/useComponentExportOnlyModules: This module shares its provider and context hook.
 export const useUsers = () => {
   const usersContext = React.useContext(UsersContext)
 

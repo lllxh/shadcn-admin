@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, type RenderResult } from 'vitest-browser-react'
 import { type Locator, userEvent } from 'vitest/browser'
+import { type RenderResult, render } from 'vitest-browser-react'
 import { SignUpForm } from './sign-up-form'
 
 const FORM_MESSAGES = {

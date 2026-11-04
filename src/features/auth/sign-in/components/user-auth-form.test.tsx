@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, type RenderResult } from 'vitest-browser-react'
 import { type Locator, userEvent } from 'vitest/browser'
+import { type RenderResult, render } from 'vitest-browser-react'
 import { UserAuthForm } from './user-auth-form'
 
 const FORM_MESSAGES = {
@@ -9,17 +9,13 @@ const FORM_MESSAGES = {
   passwordShort: 'Password must be at least 7 characters long.',
 } as const
 
-const navigate = vi.fn()
-const setUserMock = vi.fn()
-const setAccessTokenMock = vi.fn()
+const { navigate, setSessionMock } = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  setSessionMock: vi.fn(),
+}))
 
 vi.mock('@/stores/auth-store', () => ({
-  useAuthStore: () => ({
-    auth: {
-      setUser: setUserMock,
-      setAccessToken: setAccessTokenMock,
-    },
-  }),
+  authActions: { setSession: setSessionMock },
 }))
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
@@ -90,17 +86,16 @@ describe('UserAuthForm', () => {
 
       await userEvent.click(signInButton)
 
-      await vi.waitFor(() => expect(setUserMock).toHaveBeenCalledOnce())
-      expect(setUserMock).toHaveBeenCalledWith(
+      await vi.waitFor(() => expect(setSessionMock).toHaveBeenCalledOnce())
+      expect(setSessionMock).toHaveBeenCalledWith(
         expect.objectContaining({
           email: 'a@b.com',
           accountNo: expect.any(String),
           role: expect.any(Array),
           exp: expect.any(Number),
-        })
+        }),
+        'mock-access-token'
       )
-      expect(setAccessTokenMock).toHaveBeenCalledOnce()
-      expect(setAccessTokenMock).toHaveBeenCalledWith('mock-access-token')
 
       await vi.waitFor(() =>
         expect(navigate).toHaveBeenCalledWith({ to: '/', replace: true })
@@ -120,8 +115,7 @@ describe('UserAuthForm', () => {
 
     await userEvent.click(getByRole('button', { name: /Sign in/i }))
 
-    await vi.waitFor(() => expect(setUserMock).toHaveBeenCalledOnce())
-    expect(setAccessTokenMock).toHaveBeenCalledOnce()
+    await vi.waitFor(() => expect(setSessionMock).toHaveBeenCalledOnce())
 
     await vi.waitFor(() =>
       expect(navigate).toHaveBeenCalledWith({

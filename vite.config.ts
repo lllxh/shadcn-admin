@@ -3,12 +3,14 @@ import path from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { devtools } from '@tanstack/devtools-vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import { playwright } from '@vitest/browser-playwright'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    devtools(),
     tanstackRouter({
       target: 'react',
       autoCodeSplitting: true,
@@ -18,8 +20,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(import.meta.dirname, './src'),
     },
+  },
+  optimizeDeps: {
+    include: ['@tanstack/react-store'],
   },
   test: {
     silent: 'passed-only',

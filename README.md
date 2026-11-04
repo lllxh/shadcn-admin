@@ -66,9 +66,18 @@ If you want to update components using the Shadcn CLI (e.g., `npx shadcn@latest 
 
 **Routing:** [TanStack Router](https://tanstack.com/router/latest)
 
+**Client State:** [TanStack Store](https://tanstack.com/store/latest)
+
 **Type Checking:** [TypeScript](https://www.typescriptlang.org/)
 
-**Linting/Formatting:** [ESLint](https://eslint.org/) & [Prettier](https://prettier.io/)
+**Linting/Formatting:** [Biome](https://biomejs.dev/)
+
+`pnpm check` runs lint, formatting, import sorting, and Tailwind class sorting
+checks. `pnpm format` applies formatting and safe fixes. `pnpm lint` and
+`pnpm format:check` run lint and formatting checks separately.
+Tailwind class sorting uses Biome's nursery rule with automatic fixes enabled.
+Some ESLint rules have no equivalents, including TanStack Query-specific rules
+and React Compiler-specific rules. Type checking remains part of `pnpm build`.
 
 **Icons:** [Lucide Icons](https://lucide.dev/icons/), [Tabler Icons](https://tabler.io/icons) (Brand icons only)
 
@@ -99,6 +108,48 @@ Start the server
 ```bash
   pnpm run dev
 ```
+
+### State model
+
+`src/stores/auth-model.ts` contains the framework-agnostic `createAuthModel`
+factory. Its actions replace immutable snapshots, preserve unchanged references,
+and batch session updates so subscribers receive the completed transition once.
+The readonly `userStore` derives its value from the base store automatically.
+
+`src/stores/auth-store.ts` creates the browser instance and persists token changes
+to the existing cookie. React components read slices using the React adapter:
+
+```tsx
+import { useSelector } from '@tanstack/react-store'
+import { authActions, authUserStore } from '@/stores/auth-store'
+
+function AccountEmail() {
+  const email = useSelector(authUserStore, (user) => user?.email)
+  return <span>{email}</span>
+}
+
+// Event handlers and non-React code can call actions without subscribing.
+authActions.setSession(user, accessToken)
+authActions.reset()
+```
+
+The email subscription does not trigger a render for token or role changes.
+Select primitives or stable references; when selecting a new object, pass
+`{ compare: shallow }` with `shallow` from `@tanstack/store`.
+For server rendering, create a model per request instead of sharing the browser
+instance. Other renderers can use the same core with their TanStack Store adapter.
+
+### Devtools
+
+The development server includes one TanStack Devtools launcher with Query,
+Router, and Shadcn Admin panels. The application panel inspects the current
+theme, font, and direction through typed `state-request` and `state-update`
+events in `src/lib/devtools-events.ts`.
+
+Hold Shift+Alt+Ctrl (Shift+Alt+Cmd on macOS) and click an element to open its
+source in your editor. The Vite plugin also pipes browser logs to the terminal
+and server logs to the browser console. These features use the plugin defaults;
+Devtools imports and JSX are removed from production builds by default.
 
 ## Sponsoring this project ❤️
 

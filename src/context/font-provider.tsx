@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { getCookie, removeCookie, setCookie } from '@/lib/cookies'
 import { fonts } from '@/config/fonts'
-import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
 type Font = (typeof fonts)[number]
 
@@ -48,7 +48,7 @@ export function FontProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
+// biome-ignore lint/style/useComponentExportOnlyModules: This module shares its provider and context hook.
 export const useFont = () => {
   const context = useContext(FontContext)
   if (!context) {

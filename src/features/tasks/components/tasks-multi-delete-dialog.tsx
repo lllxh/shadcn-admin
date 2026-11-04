@@ -1,7 +1,10 @@
-'use client'
+import { type RowData } from '@tanstack/react-table'
+import { type DataTableFeatures } from '@/lib/table-features'
+
+;('use client')
 
 import { useState } from 'react'
-import { type Table } from '@tanstack/react-table'
+import { type ReactTable as Table } from '@tanstack/react-table'
 import { AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { sleep } from '@/lib/utils'
@@ -10,15 +13,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 
-type TaskMultiDeleteDialogProps<TData> = {
+type TaskMultiDeleteDialogProps<TData extends RowData> = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  table: Table<TData>
+  table: Table<DataTableFeatures, TData>
 }
 
 const CONFIRM_WORD = 'DELETE'
 
-export function TasksMultiDeleteDialog<TData>({
+export function TasksMultiDeleteDialog<TData extends RowData>({
   open,
   onOpenChange,
   table,

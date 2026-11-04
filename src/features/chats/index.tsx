@@ -3,16 +3,16 @@ import { Fragment } from 'react/jsx-runtime'
 import { format } from 'date-fns'
 import {
   ArrowLeft,
-  MoreVertical,
   Edit,
+  ImagePlus,
+  MessagesSquare,
+  MoreVertical,
   Paperclip,
   Phone,
-  ImagePlus,
   Plus,
   Search as SearchIcon,
   Send,
   Video,
-  MessagesSquare,
 } from 'lucide-react'
 import { cn, getDisplayNameInitials } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'

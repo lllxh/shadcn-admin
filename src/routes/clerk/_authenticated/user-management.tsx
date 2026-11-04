@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { useEffect, useState } from 'react'
 import {
   createFileRoute,
@@ -6,7 +5,7 @@ import {
   useNavigate,
   useRouter,
 } from '@tanstack/react-router'
-import { useAuth, UserButton } from '@clerk/react'
+import { UserButton, useAuth } from '@clerk/react'
 import { ExternalLink, Loader2 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { Button } from '@/components/ui/button'
@@ -97,6 +96,7 @@ function UserManagement() {
 
 const COUNTDOWN = 5 // Countdown second
 
+// biome-ignore lint/style/useComponentExportOnlyModules: This helper is only rendered by the route component.
 function Unauthorized() {
   const navigate = useNavigate()
   const { history } = useRouter()

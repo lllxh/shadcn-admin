@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
+import { render } from 'vitest-browser-react'
 import { showSubmittedData } from '@/lib/show-submitted-data'
 import { UsersInviteDialog } from './users-invite-dialog'
 
@@ -101,13 +101,13 @@ describe('UsersInviteDialog', () => {
 
     const roleSelect = getByRole('combobox', { name: /Role/i })
     await userEvent.click(roleSelect)
-    await userEvent.click(getByRole('option', { name: ROLE_VALUE }))
+    await userEvent.click(getByRole('option', { name: 'Superadmin' }))
 
     const descInput = getByRole('textbox', { name: /Description/i })
     await userEvent.fill(descInput, DESC_VALUE)
 
     await expect.element(emailInput).toHaveValue(EMAIL_VALUE)
-    await expect.element(roleSelect).toHaveTextContent(ROLE_VALUE)
+    await expect.element(roleSelect).toMatchTextContent(ROLE_VALUE)
     await expect.element(descInput).toHaveValue(DESC_VALUE)
 
     const cancelButton = getByRole('button', { name: /Cancel/i })
@@ -117,7 +117,7 @@ describe('UsersInviteDialog', () => {
     await userEvent.click(reopenButton)
 
     await expect.element(emailInput).toHaveValue('')
-    await expect.element(roleSelect).toHaveTextContent('Select a role')
+    await expect.element(roleSelect).toMatchTextContent('Select a role')
     await expect.element(descInput).toHaveValue('')
   })
 
@@ -136,7 +136,7 @@ describe('UsersInviteDialog', () => {
 
     const roleSelect = getByRole('combobox', { name: /Role/i })
     await userEvent.click(roleSelect)
-    await userEvent.click(getByRole('option', { name: ROLE_VALUE }))
+    await userEvent.click(getByRole('option', { name: 'Superadmin' }))
 
     const descInput = getByRole('textbox', { name: /Description/i })
     await userEvent.fill(descInput, DESC_VALUE)

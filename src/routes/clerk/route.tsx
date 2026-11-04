@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { ClerkProvider } from '@clerk/react'
 import { ExternalLink, Key } from 'lucide-react'
@@ -36,6 +35,7 @@ function RouteComponent() {
   )
 }
 
+// biome-ignore lint/style/useComponentExportOnlyModules: This helper is only rendered by the route component.
 function MissingClerkPubKey() {
   const codeBlock =
     'bg-foreground/10 rounded-sm py-0.5 px-1 text-xs text-foreground font-bold'

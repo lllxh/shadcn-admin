@@ -54,14 +54,14 @@ Thank you for considering contributing to **shadcn-admin**! Every contribution i
 
 ## Code Standards
 
-- Follow the existing **ESLint** and **Prettier** configurations.
+- Follow the existing **Biome** configuration.
 - Ensure your code is **type-safe** with **TypeScript**.
 - Maintain consistency with the existing code structure.
 
 > **Tips!** Before submitting your changes, run the following commands:
 
 ```bash
-pnpm lint && pnpm format && pnpm knip && pnpm build
+pnpm check && pnpm knip && pnpm build
 ```
 
 ---

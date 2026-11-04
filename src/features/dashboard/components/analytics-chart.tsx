@@ -1,4 +1,21 @@
-import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, XAxis, YAxis } from 'recharts'
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart'
+
+const chartConfig = {
+  clicks: {
+    label: 'Clicks',
+    color: 'var(--chart-1)',
+  },
+  uniques: {
+    label: 'Unique Visitors',
+    color: 'var(--chart-2)',
+  },
+} satisfies ChartConfig
 
 const data = [
   {
@@ -40,38 +57,30 @@ const data = [
 
 export function AnalyticsChart() {
   return (
-    <ResponsiveContainer width='100%' height={300}>
-      <AreaChart data={data}>
-        <XAxis
-          dataKey='name'
-          stroke='#888888'
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-        />
-        <YAxis
-          stroke='#888888'
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
+    <ChartContainer config={chartConfig} className='h-[300px] w-full'>
+      <AreaChart accessibilityLayer data={data}>
+        <XAxis dataKey='name' fontSize={12} tickLine={false} axisLine={false} />
+        <YAxis fontSize={12} tickLine={false} axisLine={false} />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent indicator='line' className='min-w-44' />
+          }
         />
         <Area
           type='monotone'
           dataKey='clicks'
-          stroke='currentColor'
-          className='text-primary'
-          fill='currentColor'
+          stroke='var(--color-clicks)'
+          fill='var(--color-clicks)'
           fillOpacity={0.15}
         />
         <Area
           type='monotone'
           dataKey='uniques'
-          stroke='currentColor'
-          className='text-muted-foreground'
-          fill='currentColor'
+          stroke='var(--color-uniques)'
+          fill='var(--color-uniques)'
           fillOpacity={0.1}
         />
       </AreaChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   )
 }

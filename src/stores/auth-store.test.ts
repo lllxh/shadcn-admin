@@ -1,9 +1,14 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { getCookie, setCookie } from '@/lib/cookies'
+import { createBrowserAuthModel } from './auth-store'
 import { clearCookies } from '@/test-utils/cookies'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-async function importAuthStore() {
-  const { useAuthStore } = await import('./auth-store')
-  return useAuthStore
+const models: ReturnType<typeof createBrowserAuthModel>[] = []
+
+function createTestModel() {
+  const model = createBrowserAuthModel()
+  models.push(model)
+  return { authStore: model.store, authActions: model.actions }
 }
 
 const sampleUser = {
@@ -13,64 +18,85 @@ const sampleUser = {
   exp: 1_700_000_000,
 }
 
-describe('useAuthStore', () => {
+describe('authStore persistence', () => {
   beforeEach(() => {
     clearCookies()
-    vi.resetModules()
+  })
+
+  afterEach(() => {
+    for (const model of models) model.dispose()
+    models.length = 0
   })
 
   it('starts with an empty access token when nothing is persisted', async () => {
-    const useAuthStore = await importAuthStore()
+    const { authStore } = createTestModel()
 
-    expect(useAuthStore.getState().auth.accessToken).toBe('')
-    expect(useAuthStore.getState().auth.user).toBeNull()
+    expect(authStore.state.accessToken).toBe('')
+    expect(authStore.state.user).toBeNull()
   })
 
   it('persists access token so a new store instance reads it back', async () => {
-    const useAuthStore = await importAuthStore()
-    useAuthStore.getState().auth.setAccessToken('session-token')
+    const { authActions } = createTestModel()
+    authActions.setAccessToken('session-token')
 
-    vi.resetModules()
-    const useAuthStoreAfterReload = await importAuthStore()
+    const { authStore: afterReload } = createTestModel()
 
-    expect(useAuthStoreAfterReload.getState().auth.accessToken).toBe(
-      'session-token'
-    )
+    expect(afterReload.state.accessToken).toBe('session-token')
   })
 
   it('clears persisted access token when resetAccessToken is used', async () => {
-    const useAuthStore = await importAuthStore()
-    useAuthStore.getState().auth.setAccessToken('to-clear')
-    useAuthStore.getState().auth.resetAccessToken()
+    const { authActions } = createTestModel()
+    authActions.setAccessToken('to-clear')
+    authActions.resetAccessToken()
 
-    vi.resetModules()
-    const useAuthStoreAfterReload = await importAuthStore()
+    const { authStore: afterReload } = createTestModel()
 
-    expect(useAuthStoreAfterReload.getState().auth.accessToken).toBe('')
+    expect(afterReload.state.accessToken).toBe('')
   })
 
   it('updates the signed-in user via setUser', async () => {
-    const useAuthStore = await importAuthStore()
+    const { authStore, authActions } = createTestModel()
 
-    useAuthStore.getState().auth.setUser({ ...sampleUser })
+    authActions.setUser({ ...sampleUser })
 
-    expect(useAuthStore.getState().auth.user).toEqual(sampleUser)
+    expect(authStore.state.user).toEqual(sampleUser)
   })
 
+  it('persists the completed session after a batched sign-in', async () => {
+    const { authStore, authActions } = createTestModel()
+    authActions.setSession(sampleUser, 'session-token')
+
+    expect(authStore.state).toEqual({
+      user: sampleUser,
+      accessToken: 'session-token',
+    })
+    expect(getCookie('thisisjustarandomstring')).toBe('"session-token"')
+  })
+
+  it.each(['malformed', '123', 'null', '{}'])(
+    'discards an invalid persisted token: %s',
+    async (value) => {
+      setCookie('thisisjustarandomstring', value)
+      const { authStore } = createTestModel()
+
+      expect(authStore.state.accessToken).toBe('')
+      expect(getCookie('thisisjustarandomstring')).toBeUndefined()
+    }
+  )
+
   it('reset clears user and access token and drops persistence', async () => {
-    const useAuthStore = await importAuthStore()
-    useAuthStore.getState().auth.setAccessToken('will-be-cleared')
-    useAuthStore.getState().auth.setUser({ ...sampleUser })
+    const { authStore, authActions } = createTestModel()
+    authActions.setAccessToken('will-be-cleared')
+    authActions.setUser({ ...sampleUser })
 
-    useAuthStore.getState().auth.reset()
+    authActions.reset()
 
-    expect(useAuthStore.getState().auth.user).toBeNull()
-    expect(useAuthStore.getState().auth.accessToken).toBe('')
+    expect(authStore.state.user).toBeNull()
+    expect(authStore.state.accessToken).toBe('')
 
-    vi.resetModules()
-    const useAuthStoreAfterReload = await importAuthStore()
+    const { authStore: afterReload } = createTestModel()
 
-    expect(useAuthStoreAfterReload.getState().auth.user).toBeNull()
-    expect(useAuthStoreAfterReload.getState().auth.accessToken).toBe('')
+    expect(afterReload.state.user).toBeNull()
+    expect(afterReload.state.accessToken).toBe('')
   })
 })

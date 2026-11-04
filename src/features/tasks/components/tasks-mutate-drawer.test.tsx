@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
+import { render } from 'vitest-browser-react'
 import { showSubmittedData } from '@/lib/show-submitted-data'
 import { type Task } from '../data/schema'
 import { TasksMutateDrawer } from './tasks-mutate-drawer'
@@ -47,15 +47,15 @@ describe('TasksMutateDrawer', () => {
 
     const titleInput = getByRole('textbox', { name: /Title/i })
     const statusSelect = getByRole('combobox', { name: /Status/i })
-    const labelRadio = getByRole('radio', { name: MOCK_TASK.label })
-    const priorityRadio = getByRole('radio', { name: MOCK_TASK.priority })
+    const labelRadio = getByRole('radio', { name: 'Feature' })
+    const priorityRadio = getByRole('radio', { name: 'Medium' })
 
     await expect.element(title).toBeInTheDocument()
     await expect.element(desc).toBeInTheDocument()
     await expect.element(titleInput).toHaveValue(MOCK_TASK.title)
     await expect
       .element(statusSelect)
-      .toHaveTextContent(new RegExp(MOCK_TASK.status, 'i'))
+      .toMatchTextContent(new RegExp(MOCK_TASK.status, 'i'))
     await expect.element(labelRadio).toBeChecked()
     await expect.element(priorityRadio).toBeChecked()
   })
@@ -151,7 +151,7 @@ describe('TasksMutateDrawer', () => {
     const statusSelect = getByRole('combobox', { name: /Status/i })
     await userEvent.click(statusSelect)
     await userEvent.click(getByRole('option', { name: /Todo/i }))
-    await expect.element(statusSelect).toHaveTextContent(/Todo/i)
+    await expect.element(statusSelect).toMatchTextContent(/Todo/i)
 
     const labelRadio = getByRole('radio', { name: /^Documentation$/i })
     await userEvent.click(labelRadio)
@@ -172,7 +172,7 @@ describe('TasksMutateDrawer', () => {
     await userEvent.click(reopenButton)
 
     await expect.element(titleInput).toHaveValue('')
-    await expect.element(statusSelect).not.toHaveTextContent(/Todo/i)
+    await expect.element(statusSelect).not.toMatchTextContent(/Todo/i)
     await expect.element(labelRadio).not.toBeChecked()
     await expect.element(priorityRadio).not.toBeChecked()
   })

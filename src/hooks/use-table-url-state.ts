@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import type {
-  ColumnFiltersState,
-  OnChangeFn,
-  PaginationState,
+import {
+  type ColumnFiltersState,
+  type OnChangeFn,
+  type PaginationState,
 } from '@tanstack/react-table'
 
 type SearchRecord = Record<string, unknown>

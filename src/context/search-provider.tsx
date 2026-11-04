@@ -34,7 +34,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
+// biome-ignore lint/style/useComponentExportOnlyModules: This module shares its provider and context hook.
 export const useSearch = () => {
   const searchContext = useContext(SearchContext)
 

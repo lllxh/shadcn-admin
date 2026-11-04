@@ -1,6 +1,7 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
-import { type Row } from '@tanstack/react-table'
+import { type Row, type RowData } from '@tanstack/react-table'
 import { Trash2 } from 'lucide-react'
+import { type DataTableFeatures } from '@/lib/table-features'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -19,11 +20,11 @@ import { labels } from '../data/data'
 import { taskSchema } from '../data/schema'
 import { useTasks } from './tasks-provider'
 
-type DataTableRowActionsProps<TData> = {
-  row: Row<TData>
+type DataTableRowActionsProps<TData extends RowData> = {
+  row: Row<DataTableFeatures, TData>
 }
 
-export function DataTableRowActions<TData>({
+export function DataTableRowActions<TData extends RowData>({
   row,
 }: DataTableRowActionsProps<TData>) {
   const task = taskSchema.parse(row.original)

@@ -1,5 +1,6 @@
-import { type Table } from '@tanstack/react-table'
+import { type ReactTable as Table } from '@tanstack/react-table'
 import { vi } from 'vitest'
+import { type DataTableFeatures } from '@/lib/table-features'
 
 /**
  * Minimal TanStack Table mock for tests that only need selected row count and
@@ -11,6 +12,6 @@ export function createTableMock(rowCount = 2) {
   const table = {
     getFilteredSelectedRowModel: () => ({ rows }),
     resetRowSelection,
-  } as unknown as Table<Record<string, unknown>>
+  } as unknown as Table<DataTableFeatures, Record<string, unknown>>
   return { table, resetRowSelection }
 }

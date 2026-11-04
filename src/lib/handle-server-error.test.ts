@@ -64,7 +64,7 @@ describe('handleServerError', () => {
   })
 
   it('logs the error to the console in development', () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
     const err = new Error('logged')
 
     handleServerError(err)
@@ -78,7 +78,7 @@ describe('handleServerError', () => {
   it('does not log the error to the console in production', () => {
     vi.stubEnv('DEV', false)
 
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
     const err = new Error('not logged')
 
     handleServerError(err)

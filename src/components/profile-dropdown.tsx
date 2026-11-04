@@ -1,4 +1,6 @@
 import { Link } from '@tanstack/react-router'
+import { useSelector } from '@tanstack/react-store'
+import { authUserStore } from '@/stores/auth-store'
 import useDialogState from '@/hooks/use-dialog-state'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -16,6 +18,7 @@ import { SignOutDialog } from '@/components/sign-out-dialog'
 
 export function ProfileDropdown() {
   const [open, setOpen] = useDialogState()
+  const email = useSelector(authUserStore, (user) => user?.email)
 
   return (
     <>
@@ -33,7 +36,7 @@ export function ProfileDropdown() {
             <div className='flex flex-col gap-1.5'>
               <p className='text-sm leading-none font-medium'>satnaing</p>
               <p className='text-xs leading-none text-muted-foreground'>
-                satnaingdev@gmail.com
+                {email ?? 'satnaingdev@gmail.com'}
               </p>
             </div>
           </DropdownMenuLabel>

@@ -1,3 +1,4 @@
+import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts'
 import {
   Card,
   CardContent,
@@ -5,6 +6,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart'
 import { AnalyticsChart } from './analytics-chart'
 
 export function Analytics() {
@@ -117,14 +124,15 @@ export function Analytics() {
             <CardDescription>Top sources driving traffic</CardDescription>
           </CardHeader>
           <CardContent>
-            <SimpleBarList
+            <BarListChart
               items={[
                 { name: 'Direct', value: 512 },
                 { name: 'Product Hunt', value: 238 },
                 { name: 'Twitter', value: 174 },
                 { name: 'Blog', value: 104 },
               ]}
-              barClass='bg-primary'
+              label='Visitors'
+              color='var(--chart-1)'
               valueFormatter={(n) => `${n}`}
             />
           </CardContent>
@@ -135,13 +143,14 @@ export function Analytics() {
             <CardDescription>How users access your app</CardDescription>
           </CardHeader>
           <CardContent>
-            <SimpleBarList
+            <BarListChart
               items={[
                 { name: 'Desktop', value: 74 },
                 { name: 'Mobile', value: 22 },
                 { name: 'Tablet', value: 4 },
               ]}
-              barClass='bg-muted-foreground'
+              label='Share'
+              color='var(--chart-2)'
               valueFormatter={(n) => `${n}%`}
             />
           </CardContent>
@@ -151,39 +160,66 @@ export function Analytics() {
   )
 }
 
-function SimpleBarList({
+function BarListChart({
   items,
   valueFormatter,
-  barClass,
+  label,
+  color,
 }: {
   items: { name: string; value: number }[]
   valueFormatter: (n: number) => string
-  barClass: string
+  label: string
+  color: string
 }) {
-  const max = Math.max(...items.map((i) => i.value), 1)
+  const chartConfig = {
+    value: { label, color },
+  } satisfies ChartConfig
+
   return (
-    <ul className='space-y-3'>
-      {items.map((i) => {
-        const width = `${Math.round((i.value / max) * 100)}%`
-        return (
-          <li key={i.name} className='flex items-center justify-between gap-3'>
-            <div className='min-w-0 flex-1'>
-              <div className='mb-1 truncate text-xs text-muted-foreground'>
-                {i.name}
-              </div>
-              <div className='h-2.5 w-full rounded-full bg-muted'>
-                <div
-                  className={`h-2.5 rounded-full ${barClass}`}
-                  style={{ width }}
-                />
-              </div>
-            </div>
-            <div className='ps-2 text-xs font-medium tabular-nums'>
-              {valueFormatter(i.value)}
-            </div>
-          </li>
-        )
-      })}
-    </ul>
+    <ChartContainer
+      config={chartConfig}
+      className='w-full'
+      style={{ height: items.length * 40 }}
+    >
+      <BarChart
+        accessibilityLayer
+        data={items}
+        layout='vertical'
+        margin={{ right: 36 }}
+      >
+        <XAxis type='number' hide />
+        <YAxis
+          dataKey='name'
+          type='category'
+          tickLine={false}
+          axisLine={false}
+          width={90}
+        />
+        <ChartTooltip
+          cursor={false}
+          content={
+            <ChartTooltipContent
+              formatter={(value) => (
+                <>
+                  <span className='text-muted-foreground'>{label}</span>
+                  <span className='ms-auto font-mono font-medium tabular-nums'>
+                    {valueFormatter(Number(value))}
+                  </span>
+                </>
+              )}
+            />
+          }
+        />
+        <Bar dataKey='value' fill='var(--color-value)' radius={4} barSize={12}>
+          <LabelList
+            dataKey='value'
+            position='right'
+            offset={8}
+            className='fill-foreground'
+            formatter={(value) => valueFormatter(Number(value))}
+          />
+        </Bar>
+      </BarChart>
+    </ChartContainer>
   )
 }

@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { createTableMock } from '@/test-utils/tanstack-table'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
+import { render } from 'vitest-browser-react'
 import { TasksMultiDeleteDialog } from './tasks-multi-delete-dialog'
+import { createTableMock } from '@/test-utils/tanstack-table'
 
 vi.mock('@/lib/utils', async (orig) => ({
   ...(await orig()),
@@ -25,7 +25,7 @@ describe('TasksMultiDeleteDialog', () => {
       name: /Delete 2 tasks/i,
     })
     const desc = getByText(
-      'Are you sure you want to delete the selected tasks?'
+      /Are you sure you want to delete the selected tasks\?/
     )
     const confirmDeleteInput = getByRole('textbox', {
       name: /Confirm by typing "DELETE"/i,

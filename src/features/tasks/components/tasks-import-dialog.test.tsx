@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
+import { render } from 'vitest-browser-react'
 import { showSubmittedData } from '@/lib/show-submitted-data'
 import { TasksImportDialog } from './tasks-import-dialog'
 
@@ -20,7 +20,7 @@ describe('TasksImportDialog', () => {
       level: 2,
       name: /Import Tasks/i,
     })
-    const desc = getByText('Import tasks quickly from a CSV file')
+    const desc = getByText('Import tasks quickly from a CSV file.')
     const fileInput = getByLabelText('File')
     const closeButtons = getByRole('dialog')
       .getByRole('button', { name: 'Close' })
