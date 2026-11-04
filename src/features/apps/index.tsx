@@ -1,6 +1,7 @@
-import { type ChangeEvent, useState } from 'react'
+import { useState } from 'react'
 import { getRouteApi } from '@tanstack/react-router'
 import { ArrowDownAZ, ArrowUpAZ, SlidersHorizontal } from 'lucide-react'
+import { useDebouncedSearch } from '@/hooks/use-debounced-search'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -39,7 +40,17 @@ export function Apps() {
 
   const [sort, setSort] = useState(initSort)
   const [appType, setAppType] = useState(type)
-  const [searchTerm, setSearchTerm] = useState(filter)
+  const { searchTerm, updateSearchTerm, isPending } = useDebouncedSearch(
+    filter,
+    (value) => {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          filter: value || undefined,
+        }),
+      })
+    }
+  )
 
   const filteredApps = apps
     .sort((a, b) =>
@@ -54,17 +65,7 @@ export function Apps() {
           ? !app.connected
           : true
     )
-    .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()))
-
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value)
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        filter: e.target.value || undefined,
-      }),
-    })
-  }
+    .filter((app) => app.name.toLowerCase().includes(filter.toLowerCase()))
 
   const handleTypeChange = (value: AppType) => {
     setAppType(value)
@@ -104,10 +105,11 @@ export function Apps() {
         <div className='my-4 flex items-end justify-between sm:my-0 sm:items-center'>
           <div className='flex flex-col gap-4 sm:my-4 sm:flex-row'>
             <Input
+              aria-label='Filter apps'
               placeholder='Filter apps...'
               className='h-9 w-40 lg:w-62.5'
               value={searchTerm}
-              onChange={handleSearch}
+              onChange={(event) => updateSearchTerm(event.target.value)}
             />
             <Select value={appType} onValueChange={handleTypeChange}>
               <SelectTrigger className='w-36'>
@@ -144,7 +146,10 @@ export function Apps() {
           </Select>
         </div>
         <Separator className='shadow-sm' />
-        <ul className='no-scrollbar grid gap-4 overflow-auto pt-4 pb-16 faded-bottom md:grid-cols-2 lg:grid-cols-3'>
+        <ul
+          aria-busy={isPending}
+          className='no-scrollbar grid gap-4 overflow-auto pt-4 pb-16 faded-bottom md:grid-cols-2 lg:grid-cols-3'
+        >
           {filteredApps.map((app) => (
             <li
               key={app.name}

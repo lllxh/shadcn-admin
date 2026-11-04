@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 import { type NavigateFn } from '@/hooks/use-table-url-state'
@@ -59,6 +59,7 @@ function UsersHarness({ data = users }: { data?: User[] }) {
 
 describe('Table v9 interactions', () => {
   beforeEach(() => vi.clearAllMocks())
+  afterEach(() => vi.useRealTimers())
 
   it('paginates users and keeps the page in URL state', async () => {
     const screen = await render(<UsersHarness />)
@@ -87,6 +88,44 @@ describe('Table v9 interactions', () => {
       .element(screen.getByRole('status', { name: 'URL search' }))
       .toMatchTextContent('"username":"user-03"')
     expect(screen.getByRole('row').all()).toHaveLength(2)
+  })
+
+  it('keeps typing immediate while delaying user filtering and URL updates', async () => {
+    const screen = await render(<UsersHarness />)
+    const input = screen.getByPlaceholder('Filter users...')
+    const url = screen.getByRole('status', { name: 'URL search' })
+    vi.useFakeTimers()
+
+    await userEvent.fill(input, 'user-0')
+    await vi.advanceTimersByTimeAsync(200)
+    await userEvent.fill(input, 'user-03')
+    await vi.advanceTimersByTimeAsync(299)
+
+    await expect.element(input).toHaveValue('user-03')
+    await expect.element(input).toHaveAttribute('aria-busy', 'true')
+    await expect.element(url).toHaveTextContent('{}')
+    expect(screen.getByRole('row').all()).toHaveLength(11)
+
+    await vi.advanceTimersByTimeAsync(1)
+    await expect.element(url).toMatchTextContent('"username":"user-03"')
+    await expect.element(input).toHaveAttribute('aria-busy', 'false')
+    expect(screen.getByRole('row').all()).toHaveLength(2)
+  })
+
+  it('resets an uncommitted search without allowing it to reappear', async () => {
+    const screen = await render(<UsersHarness />)
+    const input = screen.getByPlaceholder('Filter users...')
+    vi.useFakeTimers()
+
+    await userEvent.fill(input, 'user-03')
+    await userEvent.click(screen.getByRole('button', { name: 'Reset' }))
+    await vi.advanceTimersByTimeAsync(300)
+
+    await expect.element(input).toHaveValue('')
+    await expect
+      .element(screen.getByRole('status', { name: 'URL search' }))
+      .not.toMatchTextContent('user-03')
+    expect(screen.getByRole('row').all()).toHaveLength(11)
   })
 
   it('sorts users through the actual column menu', async () => {

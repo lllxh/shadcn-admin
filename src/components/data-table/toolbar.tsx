@@ -1,6 +1,7 @@
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { type RowData, type ReactTable as Table } from '@tanstack/react-table'
 import { type DataTableFeatures } from '@/lib/table-features'
+import { useDebouncedSearch } from '@/hooks/use-debounced-search'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DataTableFacetedFilter } from './faceted-filter'
@@ -27,31 +28,33 @@ export function DataTableToolbar<TData extends RowData>({
   searchKey,
   filters = [],
 }: DataTableToolbarProps<TData>) {
+  const filterValue = searchKey
+    ? ((table.getColumn(searchKey)?.getFilterValue() as string) ?? '')
+    : (table.state.globalFilter ?? '')
+  const { searchTerm, updateSearchTerm, cancelSearch, isPending } =
+    useDebouncedSearch(filterValue, (value) => {
+      if (searchKey) {
+        table.getColumn(searchKey)?.setFilterValue(value)
+      } else {
+        table.setGlobalFilter(value)
+      }
+    })
   const isFiltered =
-    table.state.columnFilters.length > 0 || table.state.globalFilter
+    table.state.columnFilters.length > 0 ||
+    table.state.globalFilter ||
+    isPending
 
   return (
     <div className='flex items-center justify-between'>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
-        {searchKey ? (
-          <Input
-            placeholder={searchPlaceholder}
-            value={
-              (table.getColumn(searchKey)?.getFilterValue() as string) ?? ''
-            }
-            onChange={(event) =>
-              table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
-            className='h-8 w-37.5 lg:w-62.5'
-          />
-        ) : (
-          <Input
-            placeholder={searchPlaceholder}
-            value={table.state.globalFilter ?? ''}
-            onChange={(event) => table.setGlobalFilter(event.target.value)}
-            className='h-8 w-37.5 lg:w-62.5'
-          />
-        )}
+        <Input
+          aria-label={searchPlaceholder}
+          aria-busy={isPending}
+          placeholder={searchPlaceholder}
+          value={searchTerm}
+          onChange={(event) => updateSearchTerm(event.target.value)}
+          className='h-8 w-37.5 lg:w-62.5'
+        />
         <div className='flex gap-x-2'>
           {filters.map((filter) => {
             const column = table.getColumn(filter.columnId)
@@ -70,6 +73,7 @@ export function DataTableToolbar<TData extends RowData>({
           <Button
             variant='ghost'
             onClick={() => {
+              cancelSearch()
               table.resetColumnFilters()
               table.setGlobalFilter('')
             }}
