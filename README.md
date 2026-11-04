@@ -68,6 +68,28 @@ If you want to update components using the Shadcn CLI (e.g., `npx shadcn@latest 
 
 **Client State:** [TanStack Store](https://tanstack.com/store/latest)
 
+**Server State:** [TanStack Query](https://tanstack.com/query/latest)
+
+The Tasks feature is a complete server-state example. Its domain keys, query
+function and mutation lifecycle live in `src/features/tasks/data/queries.ts`.
+The list has a 30-second stale time; sorting, filtering and pagination remain
+client-side and do not change its query key. Task data is consumed from Query,
+not copied into TanStack Store or a global context.
+
+Create, edit, label changes, bulk status/priority changes and deletion use the
+same domain mutation. Pending edits are projected from Query's mutation cache
+for optimistic feedback and disappear on failure. Successful responses update
+the confirmed cache, and each write invalidates only the Tasks list. Loading,
+empty, initial error, background refresh and stale cached data
+have explicit UI states; refetch errors keep existing rows visible.
+
+`src/features/tasks/data/tasks-api.ts` is an asynchronous **demo service**, using
+browser localStorage for persistence and simulated latency. Replace that module
+with HTTP calls once a backend contract is available, preserving abort signals
+and rejecting failed requests. It is not a production backend or a shared
+multi-user database. Remove `shadcn-admin:demo-tasks:v1` from localStorage to
+restore the seeded tasks. Existing CSV import/export controls remain previews.
+
 **Type Checking:** [TypeScript](https://www.typescriptlang.org/)
 
 **Linting/Formatting:** [Biome](https://biomejs.dev/)

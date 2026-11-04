@@ -1,13 +1,18 @@
 import { z } from 'zod'
 
-// We're keeping a simple non-relational schema here.
-// IRL, you will have a schema for your data models.
-export const taskSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  status: z.string(),
-  label: z.string(),
-  priority: z.string(),
+export const taskInputSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required.'),
+  status: z.enum(['todo', 'in progress', 'done', 'canceled', 'backlog']),
+  label: z.enum(['bug', 'feature', 'documentation']),
+  priority: z.enum(['low', 'medium', 'high']),
 })
 
+export const taskSchema = taskInputSchema.extend({ id: z.string().min(1) })
+
 export type Task = z.infer<typeof taskSchema>
+export type TaskInput = z.infer<typeof taskInputSchema>
+
+export type TaskWrite =
+  | { type: 'create'; values: TaskInput }
+  | { type: 'update'; ids: string[]; changes: Partial<TaskInput> }
+  | { type: 'delete'; ids: string[] }

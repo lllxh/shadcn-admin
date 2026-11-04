@@ -9,6 +9,7 @@ import { type Task } from '@/features/tasks/data/schema'
 import { UsersProvider } from '@/features/users/components/users-provider'
 import { UsersTable } from '@/features/users/components/users-table'
 import { type User } from '@/features/users/data/schema'
+import { renderWithQuery } from '@/test-utils/query'
 
 const route = vi.hoisted(() => ({ search: {}, navigate: vi.fn() }))
 
@@ -215,7 +216,7 @@ describe('Table v9 interactions', () => {
         priority: 'low',
       },
     ]
-    const screen = await render(
+    const screen = await renderWithQuery(
       <TasksProvider>
         <TasksTable data={data} />
       </TasksProvider>

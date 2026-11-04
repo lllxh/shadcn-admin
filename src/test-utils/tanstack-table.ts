@@ -7,7 +7,9 @@ import { type DataTableFeatures } from '@/lib/table-features'
  * `resetRowSelection` (e.g. multi-delete dialogs).
  */
 export function createTableMock(rowCount = 2) {
-  const rows = Array.from({ length: rowCount }, () => ({}))
+  const rows = Array.from({ length: rowCount }, (_, index) => ({
+    original: { id: `row-${index}` },
+  }))
   const resetRowSelection = vi.fn()
   const table = {
     getFilteredSelectedRowModel: () => ({ rows }),

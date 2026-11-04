@@ -4,6 +4,7 @@ import { ArrowUpDown, CircleArrowUp, Download, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { type DataTableFeatures } from '@/lib/table-features'
 import { sleep } from '@/lib/utils'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -18,7 +19,8 @@ import {
 } from '@/components/ui/tooltip'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
 import { priorities, statuses } from '../data/data'
-import { type Task } from '../data/schema'
+import { useTaskWrite } from '../data/queries'
+import { type Task, type TaskInput, taskInputSchema } from '../data/schema'
 import { TasksMultiDeleteDialog } from './tasks-multi-delete-dialog'
 
 type DataTableBulkActionsProps<TData extends RowData> = {
@@ -29,32 +31,19 @@ export function DataTableBulkActions<TData extends RowData>({
   table,
 }: DataTableBulkActionsProps<TData>) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const mutation = useTaskWrite()
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
-  const handleBulkStatusChange = (status: string) => {
-    const selectedTasks = selectedRows.map((row) => row.original as Task)
-    toast.promise(sleep(2000), {
-      loading: 'Updating status...',
-      success: () => {
-        table.resetRowSelection()
-        return `Status updated to "${status}" for ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}.`
+  const handleBulkChange = (changes: Partial<TaskInput>) => {
+    if (mutation.isPending) return
+    mutation.mutate(
+      {
+        type: 'update',
+        ids: selectedRows.map((row) => (row.original as Task).id),
+        changes,
       },
-      error: 'Error',
-    })
-    table.resetRowSelection()
-  }
-
-  const handleBulkPriorityChange = (priority: string) => {
-    const selectedTasks = selectedRows.map((row) => row.original as Task)
-    toast.promise(sleep(2000), {
-      loading: 'Updating priority...',
-      success: () => {
-        table.resetRowSelection()
-        return `Priority updated to "${priority}" for ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}.`
-      },
-      error: 'Error',
-    })
-    table.resetRowSelection()
+      { onSuccess: () => table.resetRowSelection() }
+    )
   }
 
   const handleBulkExport = () => {
@@ -83,6 +72,7 @@ export function DataTableBulkActions<TData extends RowData>({
                   className='size-8'
                   aria-label='Update status'
                   title='Update status'
+                  disabled={mutation.isPending}
                 >
                   <CircleArrowUp />
                   <span className='sr-only'>Update status</span>
@@ -98,7 +88,11 @@ export function DataTableBulkActions<TData extends RowData>({
               <DropdownMenuItem
                 key={status.value}
                 defaultValue={status.value}
-                onClick={() => handleBulkStatusChange(status.value)}
+                onClick={() =>
+                  handleBulkChange({
+                    status: taskInputSchema.shape.status.parse(status.value),
+                  })
+                }
               >
                 {status.icon && (
                   <status.icon className='size-4 text-muted-foreground' />
@@ -119,6 +113,7 @@ export function DataTableBulkActions<TData extends RowData>({
                   className='size-8'
                   aria-label='Update priority'
                   title='Update priority'
+                  disabled={mutation.isPending}
                 >
                   <ArrowUpDown />
                   <span className='sr-only'>Update priority</span>
@@ -134,7 +129,13 @@ export function DataTableBulkActions<TData extends RowData>({
               <DropdownMenuItem
                 key={priority.value}
                 defaultValue={priority.value}
-                onClick={() => handleBulkPriorityChange(priority.value)}
+                onClick={() =>
+                  handleBulkChange({
+                    priority: taskInputSchema.shape.priority.parse(
+                      priority.value
+                    ),
+                  })
+                }
               >
                 {priority.icon && (
                   <priority.icon className='size-4 text-muted-foreground' />
@@ -183,6 +184,11 @@ export function DataTableBulkActions<TData extends RowData>({
           </TooltipContent>
         </Tooltip>
       </BulkActionsToolbar>
+      {mutation.isError && (
+        <Alert variant='destructive' role='alert'>
+          <AlertDescription>{mutation.error.message}</AlertDescription>
+        </Alert>
+      )}
 
       <TasksMultiDeleteDialog
         open={showDeleteConfirm}

@@ -1,17 +1,18 @@
 import { useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
-import { render } from 'vitest-browser-react'
+import { tasksApi } from '../data/tasks-api'
 import { TasksMultiDeleteDialog } from './tasks-multi-delete-dialog'
+import { renderWithQuery as render } from '@/test-utils/query'
 import { createTableMock } from '@/test-utils/tanstack-table'
 
-vi.mock('@/lib/utils', async (orig) => ({
-  ...(await orig()),
-  sleep: vi.fn(() => Promise.resolve()),
-}))
+vi.mock('../data/tasks-api', () => ({ tasksApi: { write: vi.fn() } }))
 
 describe('TasksMultiDeleteDialog', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(tasksApi.write).mockResolvedValue([])
+  })
 
   it('renders the dialog with the correct title, description, input and buttons', async () => {
     const { table } = createTableMock()
@@ -112,7 +113,7 @@ describe('TasksMultiDeleteDialog', () => {
     await expect.element(confirmDeleteInput).toHaveValue('')
   })
 
-  it('shows the submitted data when deleted successfully', async () => {
+  it('clears selection and closes after deleting successfully', async () => {
     const { table, resetRowSelection } = createTableMock()
     const onOpenChange = vi.fn()
     const { getByRole } = await render(
@@ -131,7 +132,7 @@ describe('TasksMultiDeleteDialog', () => {
 
     await userEvent.click(deleteButton)
 
-    expect(onOpenChange).toHaveBeenCalledOnce()
+    await vi.waitFor(() => expect(onOpenChange).toHaveBeenCalledOnce())
     expect(onOpenChange).toHaveBeenCalledWith(false)
 
     await vi.waitFor(() => expect(resetRowSelection).toHaveBeenCalledOnce())
@@ -155,7 +156,7 @@ describe('TasksMultiDeleteDialog', () => {
     await expect.element(deleteButton).toBeEnabled()
 
     await userEvent.keyboard('{Enter}')
-    expect(onOpenChange).toHaveBeenCalledOnce()
+    await vi.waitFor(() => expect(onOpenChange).toHaveBeenCalledOnce())
     expect(onOpenChange).toHaveBeenCalledWith(false)
 
     await vi.waitFor(() => expect(resetRowSelection).toHaveBeenCalledOnce())

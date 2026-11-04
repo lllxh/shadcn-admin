@@ -65,6 +65,7 @@ export function TasksTable({ data }: DataTableProps) {
     features: dataTableFeatures,
     data,
     columns,
+    getRowId: (task) => task.id,
     state: {
       sorting,
       columnVisibility,

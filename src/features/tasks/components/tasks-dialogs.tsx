@@ -1,11 +1,13 @@
-import { showSubmittedData } from '@/lib/show-submitted-data'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ConfirmDialog } from '@/components/confirm-dialog'
+import { useTaskWrite } from '../data/queries'
 import { TasksImportDialog } from './tasks-import-dialog'
 import { TasksMutateDrawer } from './tasks-mutate-drawer'
 import { useTasks } from './tasks-provider'
 
 export function TasksDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useTasks()
+  const deletion = useTaskWrite()
   return (
     <>
       <TasksMutateDrawer
@@ -38,20 +40,25 @@ export function TasksDialogs() {
             key='task-delete'
             destructive
             open={open === 'delete'}
+            isLoading={deletion.isPending}
             onOpenChange={() => {
+              if (deletion.isPending) return
+              deletion.reset()
               setOpen('delete')
               setTimeout(() => {
                 setCurrentRow(null)
               }, 500)
             }}
             handleConfirm={() => {
-              setOpen(null)
-              setTimeout(() => {
-                setCurrentRow(null)
-              }, 500)
-              showSubmittedData(
-                currentRow,
-                'The following task has been deleted:'
+              if (deletion.isPending) return
+              deletion.mutate(
+                { type: 'delete', ids: [currentRow.id] },
+                {
+                  onSuccess: () => {
+                    setOpen(null)
+                    setCurrentRow(null)
+                  },
+                }
               )
             }}
             className='max-w-md'
@@ -63,8 +70,14 @@ export function TasksDialogs() {
                 This action cannot be undone.
               </>
             }
-            confirmText='Delete'
-          />
+            confirmText={deletion.isPending ? 'Deleting…' : 'Delete'}
+          >
+            {deletion.isError && (
+              <Alert variant='destructive' role='alert'>
+                <AlertDescription>{deletion.error.message}</AlertDescription>
+              </Alert>
+            )}
+          </ConfirmDialog>
         </>
       )}
     </>

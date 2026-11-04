@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { showSubmittedData } from '@/lib/show-submitted-data'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -23,7 +23,8 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { type Task } from '../data/schema'
+import { useTaskWrite } from '../data/queries'
+import { type Task, taskInputSchema } from '../data/schema'
 
 type TaskMutateDrawerProps = {
   open: boolean
@@ -32,7 +33,7 @@ type TaskMutateDrawerProps = {
 }
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Title is required.'),
+  title: z.string().trim().min(1, 'Title is required.'),
   status: z.string().min(1, 'Please select a status.'),
   label: z.string().min(1, 'Please select a label.'),
   priority: z.string().min(1, 'Please choose a priority.'),
@@ -45,6 +46,7 @@ export function TasksMutateDrawer({
   currentRow,
 }: TaskMutateDrawerProps) {
   const isUpdate = !!currentRow
+  const mutation = useTaskWrite()
 
   const form = useForm<TaskForm>({
     resolver: zodResolver(formSchema),
@@ -57,18 +59,29 @@ export function TasksMutateDrawer({
   })
 
   const onSubmit = (data: TaskForm) => {
-    // do something with the form data
-    onOpenChange(false)
-    form.reset()
-    showSubmittedData(data)
+    if (mutation.isPending) return
+    const values = taskInputSchema.parse(data)
+    mutation.mutate(
+      currentRow
+        ? { type: 'update', ids: [currentRow.id], changes: values }
+        : { type: 'create', values },
+      {
+        onSuccess: () => {
+          onOpenChange(false)
+          form.reset()
+        },
+      }
+    )
   }
 
   return (
     <Sheet
       open={open}
       onOpenChange={(v) => {
+        if (mutation.isPending) return
         onOpenChange(v)
         form.reset()
+        mutation.reset()
       }}
     >
       <SheetContent className='flex flex-col'>
@@ -86,7 +99,13 @@ export function TasksMutateDrawer({
             id='tasks-form'
             onSubmit={form.handleSubmit(onSubmit)}
             className='flex-1 space-y-6 overflow-y-auto px-4'
+            aria-busy={mutation.isPending}
           >
+            {mutation.isError && (
+              <Alert variant='destructive' role='alert'>
+                <AlertDescription>{mutation.error.message}</AlertDescription>
+              </Alert>
+            )}
             <FormField
               control={form.control}
               name='title'
@@ -94,7 +113,11 @@ export function TasksMutateDrawer({
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder='Enter a title' />
+                    <Input
+                      {...field}
+                      placeholder='Enter a title'
+                      disabled={mutation.isPending}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -107,6 +130,7 @@ export function TasksMutateDrawer({
                 <FormItem>
                   <FormLabel>Status</FormLabel>
                   <SelectDropdown
+                    disabled={mutation.isPending}
                     defaultValue={field.value}
                     onValueChange={field.onChange}
                     placeholder='Select dropdown'
@@ -130,6 +154,7 @@ export function TasksMutateDrawer({
                   <FormLabel>Label</FormLabel>
                   <FormControl>
                     <RadioGroup
+                      disabled={mutation.isPending}
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                       className='flex flex-col space-y-1'
@@ -168,6 +193,7 @@ export function TasksMutateDrawer({
                   <FormLabel>Priority</FormLabel>
                   <FormControl>
                     <RadioGroup
+                      disabled={mutation.isPending}
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                       className='flex flex-col space-y-1'
@@ -200,10 +226,12 @@ export function TasksMutateDrawer({
         </Form>
         <SheetFooter className='gap-2'>
           <SheetClose asChild>
-            <Button variant='outline'>Close</Button>
+            <Button variant='outline' disabled={mutation.isPending}>
+              Close
+            </Button>
           </SheetClose>
-          <Button form='tasks-form' type='submit'>
-            Save changes
+          <Button form='tasks-form' type='submit' disabled={mutation.isPending}>
+            {mutation.isPending ? 'Saving…' : 'Save changes'}
           </Button>
         </SheetFooter>
       </SheetContent>

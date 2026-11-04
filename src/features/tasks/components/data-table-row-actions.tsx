@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { labels } from '../data/data'
+import { useTaskWrite } from '../data/queries'
 import { taskSchema } from '../data/schema'
 import { useTasks } from './tasks-provider'
 
@@ -30,6 +31,7 @@ export function DataTableRowActions<TData extends RowData>({
   const task = taskSchema.parse(row.original)
 
   const { setOpen, setCurrentRow } = useTasks()
+  const mutation = useTaskWrite()
 
   return (
     <DropdownMenu modal={false}>
@@ -37,6 +39,7 @@ export function DataTableRowActions<TData extends RowData>({
         <Button
           variant='ghost'
           className='flex h-8 w-8 p-0 data-[state=open]:bg-muted'
+          disabled={mutation.isPending}
         >
           <DotsHorizontalIcon className='h-4 w-4' />
           <span className='sr-only'>Open menu</span>
@@ -57,7 +60,16 @@ export function DataTableRowActions<TData extends RowData>({
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
-            <DropdownMenuRadioGroup value={task.label}>
+            <DropdownMenuRadioGroup
+              value={task.label}
+              onValueChange={(label) =>
+                mutation.mutate({
+                  type: 'update',
+                  ids: [task.id],
+                  changes: { label: taskSchema.shape.label.parse(label) },
+                })
+              }
+            >
               {labels.map((label) => (
                 <DropdownMenuRadioItem key={label.value} value={label.value}>
                   {label.label}
